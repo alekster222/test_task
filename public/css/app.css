@@ -1,0 +1,15 @@
+body {
+    font-family: Arial;	
+}
+
+header{
+	margin-bottom: 20px;	
+}
+
+.empty-data{
+	text-align: center;
+}
+
+.buttons-list{
+	margin-bottom: 10px;
+}

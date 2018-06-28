@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+{% block title %}Список документов{% endblock %}
+
+{% block content %}
+	<div class="col-md-12 buttons-list">
+		<a href="{{ path('document_create') }}" class="btn btn-primary" role="button">Добавить</a>
+		<!-- <a href="{{ path('document_create') }}" class="badge badge-success">Добавить</a> -->
+	</div>
+
+	<table class="table">
+	  <thead>
+		<tr>
+		  <th scope="col">#</th>
+		  <th scope="col">Название</th>
+		  <th scope="col">Описание</th>
+		  <th scope="col">Действия</th>
+		</tr>
+	  </thead>
+	  <tbody>
+	  {% if docs|length > 0 %}
+		  {% for item in docs %}
+			<tr>
+			  <th scope="row">{{loop.index}}</th>
+			  <td>{{item.name}}</td>
+			  <td>{{item.description}}</td>
+			  <td>
+				<a href="{{ path('document_view', {'id': item.id} ) }}">Просмотреть</a>
+				<a href="{{ path('document_update', {'id': item.id} ) }}">Редактировать</a>				
+				<a href="{{ path('document_remove', {'id': item.id} ) }}">Удалить</a>
+			  </td>
+			</tr>
+		  {% endfor %}
+	  {% else %}
+		<tr>
+		  <td class="empty-data" colspan=4> Документов не найдено </td>
+		</tr>
+	  {% endif %}
+	  </tbody>
+	</table>
+{% endblock %}
