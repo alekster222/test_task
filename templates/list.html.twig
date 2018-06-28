@@ -7,7 +7,7 @@
 		<!-- <a href="{{ path('document_create') }}" class="badge badge-success">Добавить</a> -->
 	</div>
 
-	<table class="table">
+	<table class="table table-responsive">
 	  <thead>
 		<tr>
 		  <th scope="col">#</th>
@@ -24,9 +24,9 @@
 			  <td>{{item.name}}</td>
 			  <td>{{item.description}}</td>
 			  <td>
-				<a href="{{ path('document_view', {'id': item.id} ) }}">Просмотреть</a>
-				<a href="{{ path('document_update', {'id': item.id} ) }}">Редактировать</a>				
-				<a href="{{ path('document_remove', {'id': item.id} ) }}">Удалить</a>
+				<a href="{{ path('document_view', {'id': item.id} ) }}"><span class="fa fa-eye"></span></a>
+				<a href="{{ path('document_update', {'id': item.id} ) }}"><span class="fa fa-pencil"></span></a>
+				<a href="{{ path('document_remove', {'id': item.id} ) }}"><span class="fa fa-trash"></span></a>
 			  </td>
 			</tr>
 		  {% endfor %}

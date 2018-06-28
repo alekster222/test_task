@@ -1,9 +1,9 @@
 body {
-    font-family: Arial;	
+    font-family: Arial;
 }
 
 header{
-	margin-bottom: 20px;	
+	margin-bottom: 20px;
 }
 
 .empty-data{
@@ -13,3 +13,54 @@ header{
 .buttons-list{
 	margin-bottom: 10px;
 }
+
+.preview-image{
+    width: 200px;
+    height: 200px;
+}
+
+.preview-noimage{
+    width: 198px;
+    height: 198px;
+    border: 1px dashed #d7d7d7;
+    line-height: 198px;
+    text-align: center;
+}
+
+
+.view-wrapper{
+    width: 100%;
+}
+
+.view-wrapper label{
+    display: block;
+    width: 100%;
+}
+
+.view-wrapper .buttons-list{
+    margin: 20px 0;
+}
+
+.file-wrap{
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.file-wrap img{
+    width: 200px;
+    height: 200px;
+}
+.file-wrap span{
+    display: block;
+}
+
+.file-wrap .notimage-preview{
+    width: 198px;
+    height: 198px;
+    border: 1px dashed #d7d7d7;
+    line-height: 198px;
+    text-align: center;
+}
+
+

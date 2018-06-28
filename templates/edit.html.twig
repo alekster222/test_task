@@ -12,11 +12,8 @@
 	<div class="form-group">
         {{ form_row(form.description) }}
     </div>
-    <div class="form-group">
-			Фотографии
-    </div>
 	<div class="form-group">
-		{{ form_row(form.attachment) }}	
+		{{ form_row(form.attachment) }}
 	</div>
 	<div class="form-group">
         <input type="hidden" class="uploads" value="{{ files|default([])|json_encode }}">

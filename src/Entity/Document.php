@@ -33,10 +33,10 @@ class Document
      * @ORM\OneToMany(targetEntity="App\Entity\Attachment", mappedBy="document")
 	 * @ORM\OrderBy({"position" = "ASC"})
      */
-    private $attachment;   
+    private $attachment;
 
-    public function __construct()		
-    {        
+    public function __construct()
+    {
 		$this->attachment = new ArrayCollection();
     }
 
@@ -56,7 +56,7 @@ class Document
 
         return $this;
     }
-	
+
 	public function getDescription(): ?string
     {
         return $this->description;
@@ -67,7 +67,7 @@ class Document
         $this->description = $description;
 
         return $this;
-    }   
+    }
 
     /**
      * @return Collection|Attachment[]
@@ -98,5 +98,5 @@ class Document
         }
 
         return $this;
-    }      
+    }
 }

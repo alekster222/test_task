@@ -24,11 +24,12 @@ class DocumentType extends AbstractType {
                 array(
 					'label' => 'Описание документа',
                     'attr' => array('class' => 'form-control'),
-                    'required' => false                    
+                    'required' => false
                 )
             )
 			->add('attachment', CollectionType::class, array(
 				'entry_type' => AttachmentType::class,
+                'label' => 'Файлы',
 				'entry_options' => array('label' => false),
 				'allow_delete' => true,
 				'prototype' => true,

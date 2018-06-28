@@ -18,7 +18,7 @@ class AttachmentRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Attachment::class);
     }
-	
+
 	public function save($attachment) {
 		$this->_em->persist($attachment);
 		$this->_em->flush();
@@ -30,42 +30,26 @@ class AttachmentRepository extends ServiceEntityRepository
 		$this->_em->remove($attachment);
 		$this->_em->flush();
 	}
-	
+
 	public function getArrayList($doc) {
 		return $this->createQueryBuilder('a')
             ->where('a.document = :doc')
-            ->setParameter('doc', $doc->getId())                        
+            ->setParameter('doc', $doc->getId())
             ->getQuery()
             ->getArrayResult()
         ;
 	}
 
-//    /**
-//     * @return Attachment[] Returns an array of Attachment objects
-//     */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+    function isImage($filename) {
+        $is = @getimagesize($filename);
 
-    /*
-    public function findOneBySomeField($value): ?Attachment
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if (!$is)  {
+            return false;
+        } elseif (!in_array($is[2], array(1,2,3)) ) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
-    */
 }

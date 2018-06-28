@@ -17,36 +17,21 @@ $(function(){
             return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
         },
         init: function() {
-            var imgDropzone = this;
-            files = JSON.parse($('.uploads').val());
 
-            $.each(files, function(i) {
-                previewThumbailFromUrl({
-                    selector: '.upload-dropzone',
-                    fileName: this.orig_name,
-                    imageURL: '/uploads/' + this.name,
-					size: this.filesize
-                });
-            });
-
-            function previewThumbailFromUrl(opts) {
-                var mockFile = {
-                    name: opts.fileName,
-                    size: opts.size,
-                    accepted: true,
-                    kind: 'image'
-                };
-                imgDropzone.emit("addedfile", mockFile);
-                imgDropzone.files.push(mockFile);
-                imgDropzone.createThumbnailFromUrl(mockFile, opts.imageURL, function() {
-                    imgDropzone.emit("complete", mockFile);
-                });
-            }
         }
     });
-	
+
 	$('.collection').collection({
-            position_field_selector: '.my-position',
-            allow_duplicate: false
-        });
+        position_field_selector: '.my-position',
+        allow_duplicate: false,
+        after_init: function(collection) {
+            $('.collection input[type=hidden]:not(.is-image)').each(function(i) {
+                if ($('.is-image').eq(i).val()) {
+                    $(this).after('<img class="preview-image" src="/uploads/'+ $(this).val() +'"/>');
+                } else {
+                    $(this).after('<div class="preview-noimage">Нет превью</div>');
+                }
+            });
+        }
+    });
 });

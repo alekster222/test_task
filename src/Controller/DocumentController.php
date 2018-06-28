@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Document;
 use App\Entity\Attachment;
 use App\Form\DocumentType;
+use Doctrine\Common\Collections\ArrayCollection;
 
 
 class DocumentController extends Controller
@@ -46,28 +47,31 @@ class DocumentController extends Controller
 			$doc = $repository->save($doc);
 
 			$uploads = $this->container->getParameter('upload_directory');
-			$dir = $_SESSION['document_upload'];
+            if (!empty($_SESSION['document_upload'])) {
+                $dir = $_SESSION['document_upload'];
 
-			$attach_path = $uploads.'tmp/'.$dir;
+                $attach_path = $uploads.'tmp/'.$dir;
 
-            $arr_files = scandir($attach_path);
-            foreach($arr_files as $filename) {
-                if (in_array($filename, ['.', '..'])) {
-                    continue;
+                $arr_files = scandir($attach_path);
+                foreach($arr_files as $filename) {
+                    if (in_array($filename, ['.', '..'])) {
+                        continue;
+                    }
+                    $fileinfo = pathinfo($attach_path.'/'.$filename);
+                    $system_name = md5(time().$filename). '.' .$fileinfo['extension'];
+                    rename($attach_path.'/'.$filename, $uploads.'/'.$system_name);
+
+                    $db_file = new Attachment();
+                    $db_file->setName($system_name);
+                    $db_file->setOrigName($filename);
+                    $db_file->setFilesize(filesize($uploads.'/'.$system_name));
+                    $db_file->setIsImage($fileRepository->isImage($uploads.'/'.$system_name));
+                    $db_file->setDocument($doc);
+                    $fileRepository->save($db_file);
                 }
-                $fileinfo = pathinfo($attach_path.'/'.$filename);
-                $system_name = md5(time().$filename). '.' .$fileinfo['extension'];
-                rename($attach_path.'/'.$filename, $uploads.'/'.$system_name);
 
-                $db_file = new Attachment();
-                $db_file->setName($system_name);
-                $db_file->setOrigName($filename);
-				$db_file->setFilesize(filesize($uploads.'/'.$system_name));
-				$db_file->setDocument($doc);
-                $fileRepository->save($db_file);
+                $_SESSION['document_upload'] = "";
             }
-
-            $_SESSION['document_upload'] = "";
 
 			return $this->redirectToRoute('document_list');
 		}
@@ -89,44 +93,85 @@ class DocumentController extends Controller
 		$fileRepository = $this->getDoctrine()->getRepository(Attachment::class);
 
 		$doc = $repository->find($id);
-		$attachments = $fileRepository->getArrayList($doc);
+//		$attachments = $fileRepository->getArrayList($doc);
+
+        $attachments = new ArrayCollection();
+
+        // Create an ArrayCollection of the current Tag objects in the database
+        foreach ($doc->getAttachment() as $attachment) {
+            $attachments->add($attachment);
+        }
+
 		$form = $this->createForm(DocumentType::class, $doc);
         $form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
 
-			$doc = $repository->save($doc);
+            foreach ($attachments as $pos => $attachment) {
+                /* удаление */
+                if (false === $doc->getAttachment()->contains($attachment)) {
 
-			$uploads = $this->container->getParameter('upload_directory');
-			$dir = $_SESSION['document_upload'];
+                    $doc->getAttachment()->removeElement($attachment);
 
-			$attach_path = $uploads.'tmp/'.$dir;
-
-            $arr_files = scandir($attach_path);
-            foreach($arr_files as $filename) {
-                if (in_array($filename, ['.', '..'])) {
-                    continue;
+                    $fileRepository->remove($attachment);
                 }
-                $fileinfo = pathinfo($attach_path.'/'.$filename);
-                $system_name = md5(time().$filename). '.' .$fileinfo['extension'];
-                rename($attach_path.'/'.$filename, $uploads.'/'.$system_name);
-
-                $db_file = new Attachment();
-                $db_file->setName($system_name);
-                $db_file->setOrigName($filename);
-				$db_file->setFilesize(filesize($uploads.'/'.$system_name));
-				$db_file->setDocument($doc);
-                $fileRepository->save($db_file);
             }
 
-            $_SESSION['document_upload'] = "";
+            $attach_list = !empty($request->get('document')['attachment']) ? $request->get('document')['attachment'] : [];
+
+            $i = 0;
+
+            foreach($attach_list as $attach) {
+
+                $file = $fileRepository->findOneBy([
+                    'name' => $attach['name'],
+                    'document' => $doc->getId()
+                ]);
+
+                if (is_object($file)) {
+                    $file->setPosition($i);
+                    $fileRepository->save($file);
+                }
+
+                $i++;
+            }
+
+            $doc = $repository->save($doc);
+
+		    $uploads = $this->container->getParameter('upload_directory');
+
+			if (!empty($_SESSION['document_upload'])) {
+                $dir = $_SESSION['document_upload'];
+
+                $attach_path = $uploads.'tmp/'.$dir;
+
+                $arr_files = scandir($attach_path);
+
+                foreach($arr_files as $filename) {
+                    if (in_array($filename, ['.', '..'])) {
+                        continue;
+                    }
+                    $fileinfo = pathinfo($attach_path.'/'.$filename);
+                    $system_name = md5(time().$filename). '.' .$fileinfo['extension'];
+                    rename($attach_path.'/'.$filename, $uploads.'/'.$system_name);
+
+                    $db_file = new Attachment();
+                    $db_file->setName($system_name);
+                    $db_file->setOrigName($filename);
+                    $db_file->setFilesize(filesize($uploads.'/'.$system_name));
+                    $db_file->setIsImage($fileRepository->isImage($uploads.'/'.$system_name));
+                    $db_file->setDocument($doc);
+                    $fileRepository->save($db_file);
+                }
+
+                $_SESSION['document_upload'] = "";
+            }
 
 			return $this->redirectToRoute('document_list');
 		}
-		
+
 		return $this->render('edit.html.twig', array(
-            'form' => $form->createView(),
-			'files' => $attachments
+            'form' => $form->createView()
         ));
     }
 
@@ -153,10 +198,10 @@ class DocumentController extends Controller
     public function view(Request $request, $id) {
 
 		$repository = $this->getDoctrine()->getRepository(Document::class);
-		$docs = $repository->findAll();
+		$doc = $repository->find($id);
 
 		return $this->render('view.html.twig', array(
-            'docs' => $docs
+            'doc' => $doc
         ));
     }
 
@@ -273,10 +318,10 @@ class DocumentController extends Controller
 
         $repository = $this->getDoctrine()->getRepository(Attachment::class);
 
-		$db_file = $fileRepository->findOneBy(['orig_name' => $filename]);
+		$db_file = $repository->findOneBy(['orig_name' => $filename]);
 
 		if (is_object($db_file)) {
-            $fileRepository->remove($db_file);
+            $repository->remove($db_file);
             unlink($uploads.$filename);
         } elseif (file_exists($uploads.$dir.'/'.$filename)) {
             unlink($uploads.'tmp/'.$filename);
